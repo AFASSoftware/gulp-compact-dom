@@ -1,0 +1,7 @@
+.*
+build
+test
+gulpfile.js
+tsd.json
+tsconfig.json
+typings
