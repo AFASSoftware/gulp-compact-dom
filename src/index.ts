@@ -8,7 +8,7 @@ import compactDom = require("compact-dom");
 import {createGulpStreamWrapper, FilesTransformer} from "./gulp-stream-wrapper";
 import {Transform} from "stream";
 
-let createTranspiler = (options: compactDom.Options): Transform => {
+let createToHyperscriptTranspiler = (options: compactDom.Options): Transform => {
   
   return createGulpStreamWrapper({
     
@@ -59,4 +59,4 @@ let createTypescriptCompactDomDefinitionsGenerator = (options: compactDom.Option
   });
 }
 
-export { createTranspiler, createTypescriptCompactDomDefinitionsGenerator };
+export { createToHyperscriptTranspiler, createTypescriptCompactDomDefinitionsGenerator };
