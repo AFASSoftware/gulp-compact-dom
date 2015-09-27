@@ -11,13 +11,13 @@ configTypescript.typescript = require("typescript");
 var tsProject = ts.createProject(configTypescript);
 
 gulp.task("build", function() {
-  return gulp.src(["src/**/*.ts", "test/**/*.ts", "typings/**/*.ts"])
+  return gulp.src(["src/**/*.ts", "test/**/*.ts", "typings/**/*.d.ts"])
     .pipe(ts(tsProject))
     .pipe(gulp.dest("build/js"));
 });
 
 gulp.task("watch", ["build"], function() {
-  gulp.watch("src/**/*.ts", ["build"]);
+  gulp.watch(["src/**/*.ts", "test/**/*.ts"], ["build"]);
 });
 
 gulp.task("test", ["build"], function () { // Release here somehow circumvents clash between mocha and browserify when running the all task 

@@ -2,8 +2,8 @@
 
 import * as gulp from "gulp";
 
-import {createTranspiler} from "../src/index";
+import {createToHyperscriptTranspiler} from "../src/index";
 
 gulp.src("../../../test/testproj/**/*.txt")
-  .pipe(createTranspiler({}))
-  .pipe(gulp.dest("../../../build/test-output"))
+  .pipe(createToHyperscriptTranspiler({}))
+  .pipe(gulp.dest("../../test-output"))

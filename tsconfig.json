@@ -6,5 +6,11 @@
     "preserveConstEnums": true,
     "outDir": "build/js",
     "sourceMap": true
-  }
+  },
+  "exclude": [ 
+    "node_modules", 
+    "bin",
+    ".c9",
+    ".git"
+  ]
 }

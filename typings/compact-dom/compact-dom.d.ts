@@ -20,4 +20,6 @@ declare module "compact-dom" {
    
    export var toHyperscript: ToHyperscript
    
+   export function createRegExp(options:Options): RegExp
+   
 }

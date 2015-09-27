@@ -40,7 +40,6 @@ class GulpStreamWrapper extends Transform {
       }
     } else {
       this.handler.handle(file).then(processResults).then(() => {
-        debugger
         done();
       }).catch((reason:any) => {console.log(reason);done();});;
     }
