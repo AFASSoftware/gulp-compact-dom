@@ -1,77 +1,77 @@
-import * as fs from 'fs';
+///<reference path="../typings/vinyl/vinyl.d.ts" />
+///<reference path="../typings/es6-promise/es6-promise.d.ts" />
+///<reference path="../typings/compact-dom/compact-dom.d.ts" />
+
+import File = require('vinyl');
+
 import compactDom = require("compact-dom");
+import {createGulpStreamWrapper, FilesTransformer} from "./gulp-stream-wrapper";
+import {Transform} from "stream";
+import {createTypescriptDefinitionsManagerLogic} from "./typescript-definitions-manager-logic";
+import * as path from "path";
+import * as fs from "fs";
 
-let SortedArray: any = require("sorted-array");
+export interface TypescriptCompactDomDefinitionsManager {
+  glob: string;
+  transform: Transform;
+  update: (event: {type:string; path:string}) => void;
+};
 
-interface ParsedFile {
-  path: string;
-  tagNames: string[];
-  classNames: string[];
-}
-
-let createTypescriptDefinitionsManager = (options: compactDom.Options) => {
+export let createTypescriptDefinitionsManager = (output: string, glob: string, options: compactDom.Options): TypescriptCompactDomDefinitionsManager => {
+  let logic = createTypescriptDefinitionsManagerLogic(options);
   
-  let parsedFiles: {[index:string]: ParsedFile} = {};
-  
-  let parse = (path: string, contents: string) => {
-    let result: ParsedFile = {
-      path: path,
-      tagNames: [],
-      classNames: []
-    }
-    contents.split("\n").forEach((line: string) => {
-      let regexp = compactDom.createRegExp(options);
-      let matches: string[];
-      while ((matches = regexp.exec(line)) !== null) {
-        var split = matches[1].split(".");
-        result.tagNames.push(split[1]);
-        for (let i=2;i<split.length;i++) {
-          result.classNames.push(split[i]);
+  let resultFile = <File>undefined;
+  let lastResultFileContents = <string>undefined;
+  let transform = createGulpStreamWrapper({
+    
+    handle: (file: File) => {
+      return new Promise<File[]>((resolve: (result: File[]) => void) => {
+        if (file.isNull()) {
+          resolve([]);
+        } else if (file.isBuffer()) {
+          var converter = compactDom.toHyperscript.createConverter(options);
+          logic.addFile(file.path, file.contents.toString())
+          resolve([]);
+        } else if (file.isStream()) {
+          throw new Error("Streaming is not supported");
         }
-      }
-    });
-    return result;
+      });
+    },
+    
+    finish: () => {
+      return new Promise<File[]>((resolve: (result: File[]) => void) => {
+        resultFile = new File({path:output});
+        lastResultFileContents = logic.createOutput();
+        resultFile.contents = new Buffer(lastResultFileContents);
+        resolve([resultFile]);
+      });
+    }
+
+  });
+  
+  let update = (event: {type:string; path:string}) => {
+    if (!resultFile) {
+      throw new Error("transform was not yet complete when watching started");
+    }
+    console.log("type:"+event.type+", path:"+event.path);
+    if (event.type === "changed") {
+      logic.updateFile(event.path, fs.readFileSync(event.path).toString());
+    } else if (event.type === "added") {
+      logic.addFile(event.path, fs.readFileSync(event.path).toString());
+    } else {
+      logic.removeFile(event.path);
+    }
+    let newContents = logic.createOutput();
+    if (newContents !== lastResultFileContents) {
+      lastResultFileContents = newContents;
+      console.log("updating " + resultFile.path);
+      fs.writeFileSync(resultFile.path, newContents);
+    }
   }
   
   return {
-    addFile: (path: string, contents: string): void => {
-      var parsedFile = parse(path, contents);
-      parsedFiles[path] = parsedFile;
-    },
-    removeFile: (path: string): void => {
-      delete parsedFiles[path];
-    },
-    updateFile: (path: string, contents: string): void => {
-      var parsedFile = parse(path, contents);
-      parsedFiles[path] = parsedFile;
-    },
-    createOutput: (): string => {
-      let tagNames = new SortedArray([]);
-      let classNames = new SortedArray([]);
-      Object.keys(parsedFiles).forEach((key:string) => {
-        parsedFiles[key].tagNames.forEach((tagName: string) => {
-          tagNames.insert(tagName);
-        });
-        parsedFiles[key].classNames.forEach((className: string) => {
-          classNames.insert(className);
-        });
-      });
-      return ` // Code generated using gulp-compact-dom
-interface CompactDomNode {
- (propertiesOrFirstChild?: maquette.VNodeProperties|maquette.VNodeChild, ...children: maquette.VNodeChild[] ): maquette.VNode;
-  
-  // Lists every css class used
-${ tagNames.array.map((tagName: string) => `  ${tagName}: CompactDomNode;`).join("\n") }
-}
-
-declare module maquette.h {
-  
-  // lists every tagname used
-${ classNames.array.map((className: string) => `  export var ${className}: CompactDomNode;`).join("\n") }
-}
-`;
-    } 
+    glob,
+    transform,
+    update
   }
 }
-
-export {createTypescriptDefinitionsManager}

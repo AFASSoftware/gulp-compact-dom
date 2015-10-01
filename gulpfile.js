@@ -5,19 +5,33 @@ var mocha = require("gulp-mocha");
 var del = require("del");
 var listing = require("gulp-task-listing");
 var tslint = require("gulp-tslint");
+var sourcemaps = require("gulp-sourcemaps");
+var path = require("path");
 
 var configTypescript = require("./tsconfig.json").compilerOptions;
 configTypescript.typescript = require("typescript");
 var tsProject = ts.createProject(configTypescript);
 
+gulp.task("cls", function(){
+  console.log("\033[2J");
+  console.log("\033c");
+});
+
 gulp.task("build", function() {
-  return gulp.src(["src/**/*.ts", "test/**/*.ts", "typings/**/*.d.ts"])
+  return gulp.src(["typings/**/*.d.ts", "src/**/*.ts", "test/**/*.ts"],  {base: "."})
+    .pipe(sourcemaps.init())
     .pipe(ts(tsProject))
+    .pipe(sourcemaps.write(".", {
+      includeContent: false, 
+      sourceRoot: function(file) {
+        return file.relative.split(path.sep).map(function(){return ".."}).join("/")+"/../";
+      } 
+    }))
     .pipe(gulp.dest("build/js"));
 });
 
 gulp.task("watch", ["build"], function() {
-  gulp.watch(["src/**/*.ts", "test/**/*.ts"], ["build"]);
+  gulp.watch(["src/**/*.ts", "test/**/*.ts"], ["cls", "build"]);
 });
 
 gulp.task("test", ["build"], function () { // Release here somehow circumvents clash between mocha and browserify when running the all task 

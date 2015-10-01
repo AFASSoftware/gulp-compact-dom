@@ -1,11 +1,8 @@
-///<reference path="../typings/gulp/gulp.d.ts" />
-
 import * as gulp from "gulp";
 
+import {createTypescriptDefinitionsManager} from "../src/index";
 
-import {createTypescriptCompactDomDefinitionsManager} from "../src/index";
-
-let definitionsManager =  createTypescriptCompactDomDefinitionsManager(
+let definitionsManager =  createTypescriptDefinitionsManager(
   "compact-dom-definitions.d.ts",
   "../../../test/testproj/**/*.txt",
   {}
