@@ -1,6 +1,6 @@
 {
   "name": "gulp-compact-dom",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "gulp plugin to transform compact-dom notation to hyperscript",
   "main": "lib/index.js",
   "directories": {
@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/AFASSoftware/gulp-compact-dom#readme",
   "dependencies": {
-    "compact-dom": "^0.4.0",
+    "compact-dom": "^0.4.1",
     "gulp-util": "^3.0.6",
     "sorted-array": "^2.0.1",
     "vinyl": "^0.5.3"
