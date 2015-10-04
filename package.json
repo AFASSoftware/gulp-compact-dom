@@ -1,6 +1,6 @@
 {
   "name": "gulp-compact-dom",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "gulp plugin to transform compact-dom notation to hyperscript",
   "main": "lib/index.js",
   "directories": {

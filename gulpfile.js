@@ -66,4 +66,4 @@ gulp.task("release", ["build"], function(){
 
 gulp.task("all", ["build", "test", "release"]);
 
-gulp.task("default", ["build"]);
+gulp.task("default", ["release"]);
