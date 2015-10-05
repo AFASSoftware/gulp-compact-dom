@@ -61,13 +61,13 @@ interface CompactDomNode {
  (propertiesOrFirstChild?: maquette.VNodeProperties|maquette.VNodeChild, ...children: maquette.VNodeChild[] ): maquette.VNode;
   
   // Lists every css class used
-${ tagNames.array.map((tagName: string) => `  ${tagName}: CompactDomNode;`).join("\n") }
+${ classNames.array.map((className: string) => `  export var ${className}: CompactDomNode;`).join("\n") }
 }
 
 declare module maquette.h {
   
   // lists every tagname used
-${ classNames.array.map((className: string) => `  export var ${className}: CompactDomNode;`).join("\n") }
+${ tagNames.array.map((tagName: string) => `  ${tagName}: CompactDomNode;`).join("\n") }
 }
 `;
     } 
